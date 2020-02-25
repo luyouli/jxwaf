@@ -6,6 +6,12 @@ local host = ssl.server_name()
 local string_find = string.find
 local string_sub = string.sub
 local ssl_host = nil
+local exit_code = require "resty.jxwaf.exit_code"
+
+if not host then
+  return ngx.exit(444)
+end
+
 
 if waf_rule[host] then
   ssl_host = waf_rule[host]
@@ -17,8 +23,8 @@ else
   end
 end
 
-local exit_code = require "resty.jxwaf.exit_code"
-if ssl_host then
+
+if ssl_host and ssl_host["domain_set"]["https"] == 'true' then
 	local clear_ok, clear_err = ssl.clear_certs()
   if not clear_ok then
     local error_info = {}
